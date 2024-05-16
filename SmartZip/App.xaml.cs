@@ -1,4 +1,6 @@
-﻿using System.Configuration;
+﻿using SmartZip.Helper;
+using SmartZip.Views;
+using System.Configuration;
 using System.Data;
 using System.Windows;
 
@@ -7,18 +9,30 @@ namespace SmartZip
     /// <summary>
     /// Interaction logic for App.xaml
     /// </summary>
-    public partial class App : Application
+    public partial class App : System.Windows.Application
     {
+        private ZipManager zipManager;
+
         private void App_Startup(object sender, StartupEventArgs e)
         {
-            // Application is running
-            // Process command line args
-            foreach (string arg in e.Args)
+            zipManager = new ZipManager();
+            if (e.Args.Length > 0)
             {
-                Helper.ZipManager zipManager = new Helper.ZipManager();
-                zipManager.UnZipFiles(new string[] { arg });
+                foreach (string arg in e.Args)
+                {
+                    if (!zipManager.UnZipFile(arg))
+                    {
+                        PasswordManager manager = new PasswordManager(zipManager);
+                        manager.ShowDialog();
+                    }
+                }
+                System.Windows.Application.Current.Shutdown();
             }
-            Application.Current.Shutdown();
+            else
+            {
+                PasswordManager manager = new PasswordManager(zipManager);
+                manager.Show();
+            }
         }
     }
 }

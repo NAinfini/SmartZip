@@ -5,8 +5,9 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SmartZip"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800" AllowDrop="True">
-    <Grid Width="800" Height="450" AllowDrop="True" PreviewDrop="Grid_PreviewDrop">
-        <Label x:Name="lblDrop" Content="Drop files here" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="20" FontWeight="Bold" Foreground="Gray" />
+        Title="MainWindow" Height="400" Width="300" AllowDrop="True">
+    <Grid AllowDrop="True" PreviewDrop="Grid_PreviewDrop">
+        <ListView ItemsSource="{Binding passwordStorage}">
+        </ListView>
     </Grid>
 </Window>

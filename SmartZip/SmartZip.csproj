@@ -9,8 +9,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="DevExpress.Wpf.Grid" Version="23.2.5" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="SevenZipSharp.Net45" Version="1.0.19" />
   </ItemGroup>
-
+  
 </Project>

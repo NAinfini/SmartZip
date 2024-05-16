@@ -5,27 +5,53 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using SevenZip;
 
 namespace SmartZip.Helper
 {
     public class ZipManager
     {
-        private FileManager fileManager = new FileManager();
+        public static readonly string MainFolder = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\\SmartZip\\";
+
+        public static readonly string PasswordFileLocation = MainFolder + "PasswordList.json";
+
+        public PasswordStorage passwordStorage;
 
         public ZipManager()
         {
-            SevenZipBase.SetLibraryPath("C:\\Program Files\\7-Zip\\7z.dll");
-            fileManager.GetPasswords();
+            if (!Directory.Exists(MainFolder))
+            {
+                Directory.CreateDirectory(MainFolder);
+            }
+
+            if (!File.Exists(PasswordFileLocation))
+            {
+                File.Create(PasswordFileLocation).Close();
+            }
+
+            if (string.IsNullOrEmpty(File.ReadAllText(PasswordFileLocation)))
+            {
+                File.WriteAllText(PasswordFileLocation, "{\"passwords\":[]}");
+            }
+            passwordStorage = Newtonsoft.Json.JsonConvert.DeserializeObject<PasswordStorage>(File.ReadAllText(PasswordFileLocation));
+            if (File.Exists("C:\\Program Files\\7-Zip\\7z.dll"))
+            {
+                SevenZipBase.SetLibraryPath("C:\\Program Files\\7-Zip\\7z.dll");
+            }
+            else
+            {
+                System.Windows.MessageBox.Show("7-Zip library not found. Please install 7-Zip to use this application.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         public bool UnZipFile(string file)
         {
-            foreach (string password in fileManager.GetPasswords())
+            foreach (string pass in passwordStorage.GetPasswords())
             {
                 try
                 {
-                    UnZip(file, password);
+                    UnZip(file, pass);
                     return true;
                 }
                 catch (ExtractionFailedException)
@@ -40,11 +66,11 @@ namespace SmartZip.Helper
         {
             foreach (string file in files)
             {
-                foreach (string password in fileManager.GetPasswords())
+                foreach (string pass in passwordStorage.GetPasswords())
                 {
                     try
                     {
-                        UnZip(file, password);
+                        UnZip(file, pass);
                         return true;
                     }
                     catch (ExtractionFailedException)
@@ -63,7 +89,6 @@ namespace SmartZip.Helper
             if (!string.IsNullOrEmpty(password))
             {
                 zipExtractor = new SevenZipExtractor(zippedFilePath, password);
-                zipExtractor.Extracting += ZipExtractor_Extracting;
                 int topLevelFilesCount = GetTopLevelFilesCount(zipExtractor);
                 if (topLevelFilesCount == 1)
                 {
@@ -95,10 +120,6 @@ namespace SmartZip.Helper
             }
 
             return count;
-        }
-
-        private static void ZipExtractor_Extracting(object sender, ProgressEventArgs e)
-        {
         }
     }
 }
