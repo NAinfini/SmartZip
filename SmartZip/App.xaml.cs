@@ -16,6 +16,10 @@ namespace SmartZip
         private void App_Startup(object sender, StartupEventArgs e)
         {
             zipManager = new ZipManager();
+#if DEBUG
+            MainWindow MW = new MainWindow();
+            MW.Show();
+#endif
             if (e.Args.Length > 0)
             {
                 foreach (string arg in e.Args)

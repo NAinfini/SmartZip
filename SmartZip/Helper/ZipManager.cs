@@ -35,7 +35,12 @@ namespace SmartZip.Helper
                 File.WriteAllText(PasswordFileLocation, "{\"passwords\":[]}");
             }
             passwordStorage = Newtonsoft.Json.JsonConvert.DeserializeObject<PasswordStorage>(File.ReadAllText(PasswordFileLocation));
-            if (File.Exists("C:\\Program Files\\7-Zip\\7z.dll"))
+
+            if (File.Exists("7z.dll"))
+            {
+                SevenZipBase.SetLibraryPath("7z.dll");
+            }
+            else if (File.Exists("C:\\Program Files\\7-Zip\\7z.dll"))
             {
                 SevenZipBase.SetLibraryPath("C:\\Program Files\\7-Zip\\7z.dll");
             }
@@ -73,9 +78,8 @@ namespace SmartZip.Helper
                         UnZip(file, pass);
                         return true;
                     }
-                    catch (ExtractionFailedException)
+                    catch (Exception)
                     {
-                        continue;
                     }
                 }
             }
@@ -84,20 +88,11 @@ namespace SmartZip.Helper
 
         private void UnZip(string zippedFilePath, string password)
         {
-            SevenZipExtractor zipExtractor = null;
-
-            if (!string.IsNullOrEmpty(password))
+            try
             {
-                zipExtractor = new SevenZipExtractor(zippedFilePath, password);
-                int topLevelFilesCount = GetTopLevelFilesCount(zipExtractor);
-                if (topLevelFilesCount == 1)
+                if (!string.IsNullOrEmpty(password))
                 {
-                    // If there's only one file, extract it to the folder of the zipped file.
-                    string directoryPath = Path.GetDirectoryName(zippedFilePath);
-                    zipExtractor.ExtractArchive(directoryPath);
-                }
-                else if (topLevelFilesCount > 1)
-                {
+                    SevenZipExtractor zipExtractor = new SevenZipExtractor(zippedFilePath, password);
                     // If there are multiple files, create a new folder and extract files there.
                     string directoryName = Path.GetFileNameWithoutExtension(zippedFilePath);
                     string extractPath = Path.Combine(Path.GetDirectoryName(zippedFilePath), directoryName);
@@ -105,21 +100,32 @@ namespace SmartZip.Helper
                     zipExtractor.ExtractArchive(extractPath);
                 }
             }
+            catch (Exception e)
+            {
+                throw;
+            }
         }
 
         private int GetTopLevelFilesCount(SevenZipExtractor zipExtractor)
         {
-            int count = 0;
-
-            foreach (var entry in zipExtractor.ArchiveFileData)
+            try
             {
-                if (string.IsNullOrEmpty(Path.GetDirectoryName(entry.FileName)))
-                {
-                    count++;
-                }
-            }
+                int count = 0;
 
-            return count;
+                foreach (var entry in zipExtractor.ArchiveFileData)
+                {
+                    if (string.IsNullOrEmpty(Path.GetDirectoryName(entry.FileName)))
+                    {
+                        count++;
+                    }
+                }
+
+                return count;
+            }
+            catch (Exception)
+            {
+                return 2;
+            }
         }
     }
 }

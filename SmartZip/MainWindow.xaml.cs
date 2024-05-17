@@ -37,14 +37,8 @@ namespace SmartZip
             if (e.Data.GetDataPresent(DataFormats.FileDrop))
             {
                 string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
-                if (zipManager.UnZipFiles(files))
-                {
-                    MessageBox.Show("Files extracted successfully.", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
-                }
-                else
-                {
-                    MessageBox.Show("Failed to extract files.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
+                zipManager = new ZipManager();
+                zipManager.UnZipFiles(files);
             }
         }
     }

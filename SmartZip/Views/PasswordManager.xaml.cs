@@ -36,18 +36,6 @@ namespace SmartZip.Views
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        private void Add_Click(object sender, RoutedEventArgs e)
-        {
-        }
-
-        private void Remove_Click(object sender, RoutedEventArgs e)
-        {
-        }
-
-        private void Edit_Click(object sender, RoutedEventArgs e)
-        {
-        }
-
         private void OnpropertyChanged(string propertyName)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));

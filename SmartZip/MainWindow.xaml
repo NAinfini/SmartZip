@@ -7,7 +7,8 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="400" Width="300" AllowDrop="True">
     <Grid AllowDrop="True" PreviewDrop="Grid_PreviewDrop">
-        <ListView ItemsSource="{Binding passwordStorage}">
-        </ListView>
+        <StackPanel AllowDrop="True" PreviewDrop="Grid_PreviewDrop" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+            <Label Content="Drag and drop files here" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,0,0,0" />
+        </StackPanel>
     </Grid>
 </Window>
