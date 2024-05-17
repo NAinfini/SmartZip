@@ -9,9 +9,37 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="DevExpress.Wpf.Grid" Version="23.2.5" />
+    <None Remove="images\connected.png" />
+    <None Remove="images\debug.png" />
+    <None Remove="images\disconnected.png" />
+    <None Remove="images\error.png" />
+    <None Remove="images\info.png" />
+    <None Remove="images\LogIcon.png" />
+    <None Remove="images\time.png" />
+    <None Remove="images\warning.png" />
+    <None Remove="Views\debug.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Catel.Core" Version="6.0.3" />
+    <PackageReference Include="DevExpress.Wpf" Version="23.2.5" />
+    <PackageReference Include="DevExpress.Wpf.Themes.All" Version="23.2.5" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="Orc.Controls" Version="5.0.5" />
+    <PackageReference Include="Orc.LogViewer" Version="5.0.0" />
+    <PackageReference Include="Orc.Theming" Version="5.0.0" />
     <PackageReference Include="SevenZipSharp.Net45" Version="1.0.19" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="images\connected.png" />
+    <Resource Include="images\debug.png" />
+    <Resource Include="images\disconnected.png" />
+    <Resource Include="images\error.png" />
+    <Resource Include="images\info.png" />
+    <Resource Include="images\LogIcon.png" />
+    <Resource Include="images\time.png" />
+    <Resource Include="images\warning.png" />
   </ItemGroup>
   
 </Project>

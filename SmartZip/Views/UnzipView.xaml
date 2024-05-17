@@ -1,0 +1,30 @@
+﻿<Window x:Class="SmartZip.Views.UnzipView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:SmartZip.Views"
+        mc:Ignorable="d"
+        Title="UnzipVIew" Height="400" Width="300">
+    <Grid AllowDrop="True" Background="#FF444444">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="20" />
+            <RowDefinition Height="30" />
+            <RowDefinition Height="10" />
+            <RowDefinition Height="100" />
+            <RowDefinition Height="20" />
+            <RowDefinition Height="15" />
+            <RowDefinition Height="20" />
+            <RowDefinition Height="20" />
+        </Grid.RowDefinitions>
+        <Label Content="Selected Files:" HorizontalAlignment="left" VerticalAlignment="Center" Margin="20,0,0,0"  Grid.Row="1" Foreground="White" />
+        <ListBox x:Name="listBox" ItemsSource="{Binding UnzipFileNames}" Grid.Row="3" Margin="20,0,20,0" Background="Gray" />
+        <ProgressBar x:Name="progressBar" Grid.Row="5" Margin="40,0,40,0" Background="Gray" />
+        <StackPanel Grid.Row="7" Orientation="Horizontal" HorizontalAlignment="Center">
+            <Button x:Name="btnUnzip" Content="Unzip" Grid.Row="7" Margin="10,0,0,0" />
+            <Button x:Name="btnPassword" Content="Passwords" Grid.Row="7" Margin="10,0,0,0" Click="btnPassword_Click" />
+            <Button x:Name="btnCancel" Content="Cancel" Grid.Row="7" Margin="10,0,0,0" />
+            <Button x:Name="btnLog" Content="Log" Grid.Row="7" Margin="10,0,0,0" Click="btnLog_Click" />
+        </StackPanel>
+    </Grid>
+</Window>

@@ -1,4 +1,5 @@
-﻿using SmartZip.Helper;
+﻿using DevExpress.Xpf.Dialogs;
+using SmartZip.Helper;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -22,46 +23,38 @@ namespace SmartZip.Views
     /// </summary>
     public partial class PasswordManager : Window
     {
-        public ZipManager zipManager { get; set; }
+        public PasswordStorage ps { get; set; }
 
-        public PasswordStorage passwordStorage { get; set; }
-
-        public PasswordManager(ZipManager m)
+        public PasswordManager(PasswordStorage p)
         {
             InitializeComponent();
             DataContext = this;
-            zipManager = m;
-            passwordStorage = zipManager.passwordStorage;
-        }
-
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        private void OnpropertyChanged(string propertyName)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
-
-        private void TableView_CellValueChanged(object sender, DevExpress.Xpf.Grid.CellValueChangedEventArgs e)
-        {
-            if (e.Column.FieldName == "Password")
-            {
-                passwordStorage.UpdateFile();
-            }
-            CtrlPass.RefreshData();
-        }
-
-        private void passTable_AddingNewRow(object sender, AddingNewEventArgs e)
-        {
-            passwordStorage.AddEmptyPair();
+            ps = p;
         }
 
         private void passTable_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
         {
             if (e.Key == Key.Delete)
             {
-                passwordStorage.RemovePair((NamePassPair)CtrlPass.SelectedItem);
+                stringItem item = CtrlPass.SelectedItem as stringItem;
+                var res = System.Windows.MessageBox.Show($"Are you sure you want to delete \'{item.Password}\' ?", "Delete Password", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                if (res == MessageBoxResult.Yes)
+                {
+                    ps.pass.Remove(item);
+                    ps.Save();
+                    CtrlPass.RefreshData();
+                }
+            }
+        }
+
+        private void passTable_CellValueChanged(object sender, DevExpress.Xpf.Grid.CellValueChangedEventArgs e)
+        {
+            if (!string.IsNullOrEmpty((string)e.Value))
+            {
+                ps.Save();
                 CtrlPass.RefreshData();
             }
+           ;
         }
     }
 }
