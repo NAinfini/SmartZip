@@ -1,6 +1,7 @@
 ﻿using Catel.Logging;
+using DevExpress.CodeParser;
 using Orc.Controls;
-
+using SmartZip.Views;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -13,16 +14,18 @@ namespace ConsequenceAnalysis.helper
         private static ILog logger = LogManager.GetCurrentClassLogger();
         private static readonly string MainFolder = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\\SmartZip\\";
         private static string FileName;
+        public static UnzipView zv;
 
         /// <summary>
         /// Initialization of the System Logs
         /// </summary>
-        public static void Initialization()
+        public static void Initialization(UnzipView av)
         {
             try
             {
                 Stopwatch stopwatch = new Stopwatch();
                 stopwatch.Start();
+                zv = av;
                 FileName = MainFolder + "Logs\\SystemLogs " + DateTime.Now.ToString("yyyy-MM-dd HH-mm-ss");
                 if (!Directory.Exists(MainFolder + "Logs"))
                 {
@@ -69,6 +72,7 @@ namespace ConsequenceAnalysis.helper
     {
         protected override void Write(ILog log, string message, LogEvent logEvent, object extraData, LogData logData, DateTime time)
         {
+            SystemLogs.zv.LastLog = message;
         }
     }
 }

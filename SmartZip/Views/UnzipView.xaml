@@ -16,6 +16,8 @@
             <RowDefinition Height="15" />
             <RowDefinition Height="20" />
             <RowDefinition Height="20" />
+            <RowDefinition Height="120" />
+            <RowDefinition Height="30" />
         </Grid.RowDefinitions>
         <Label Content="Selected Files:" HorizontalAlignment="left" VerticalAlignment="Center" Margin="20,0,0,0"  Grid.Row="1" Foreground="White" />
         <ListBox x:Name="listBox" ItemsSource="{Binding UnzipFileNames}" Grid.Row="3" Margin="20,0,20,0" Background="Gray" />
@@ -24,7 +26,33 @@
             <Button x:Name="btnUnzip" Content="Unzip" Grid.Row="7" Margin="10,0,0,0" />
             <Button x:Name="btnPassword" Content="Passwords" Grid.Row="7" Margin="10,0,0,0" Click="btnPassword_Click" />
             <Button x:Name="btnCancel" Content="Cancel" Grid.Row="7" Margin="10,0,0,0" />
-            <Button x:Name="btnLog" Content="Log" Grid.Row="7" Margin="10,0,0,0" Click="btnLog_Click" />
         </StackPanel>
+        <StatusBar Height="30" Margin="5,5,5,5" VerticalAlignment="Center" Grid.Row="9" Background="Transparent">
+            <StatusBarItem Width="20" Height="20" VerticalAlignment="Center">
+                <StatusBarItem.Background>
+                    <ImageBrush ImageSource="/Images/LogIcon.png" />
+                </StatusBarItem.Background>
+            </StatusBarItem>
+            <Separator HorizontalAlignment="Center" Width="2" />
+            <StatusBarItem>
+                <Label Content="{Binding LastLog}"  MouseLeftButtonDown="LogTextBar_ItemClick" VerticalAlignment="Center" Width="200">
+                    <Label.Style>
+                        <Style TargetType="{x:Type Label}">
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="ToolTip" Value="{Binding LastLog}" />
+                                    <Setter Property="FontStyle" Value="Italic" />
+                                    <Setter Property="Foreground" Value="#537bfc" />
+                                    <Setter Property="Cursor" Value="Hand" />
+                                </Trigger>
+                                <Trigger Property="IsMouseOver" Value="false">
+                                    <Setter Property="Foreground" Value="#ffffff" />
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Label.Style>
+                </Label>
+            </StatusBarItem>
+        </StatusBar>
     </Grid>
 </Window>

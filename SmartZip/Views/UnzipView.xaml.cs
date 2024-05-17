@@ -5,6 +5,7 @@ using SevenZip;
 using SmartZip.Helper;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -17,11 +18,25 @@ namespace SmartZip.Views
     /// <summary>
     /// Interaction logic for UnzipVIew.xaml
     /// </summary>
-    public partial class UnzipView : Window
+    public partial class UnzipView : Window, INotifyPropertyChanged
     {
         private PasswordStorage passwordStorage;
         private ILog logger = LogManager.GetCurrentClassLogger();
 
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        private string m_LastLog = "";
+
+        public string LastLog
+        {
+            get => m_LastLog;
+            set
+            {
+                m_LastLog = value;
+                OnPropertyChanged(nameof(LastLog));
+            }
+        }
+        private Window OpenedLog;
         public UnzipView(PasswordStorage p)
         {
             try
@@ -31,7 +46,8 @@ namespace SmartZip.Views
                 Stopwatch stopwatch = new Stopwatch();
                 stopwatch.Start();
                 passwordStorage = p;
-                SystemLogs.Initialization();
+                Closing += (s, e) => windowClosed();
+                SystemLogs.Initialization(this);
                 if (File.Exists("7z.dll"))
                 {
                     SevenZipBase.SetLibraryPath("7z.dll");
@@ -53,6 +69,18 @@ namespace SmartZip.Views
             }
         }
 
+        private void windowClosed()
+        {
+            try
+            {
+                OpenedLog?.Close();
+            }
+            catch (Exception e)
+            {
+                logger.Error(e, "Failed to save password storage");
+            }
+        }
+
         private void btnPassword_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -65,13 +93,20 @@ namespace SmartZip.Views
                 logger.Error(ex, "Failed to open Password Manager");
             }
         }
-
-        private void btnLog_Click(object sender, RoutedEventArgs e)
+        private void LogTextBar_ItemClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             try
             {
+                if(OpenedLog != null)
+                {
+                    OpenedLog.Focus();
+                    return;
+                }
                 LogWindow logWindow = new LogWindow();
                 logWindow.Show();
+                OpenedLog = logWindow;
+                logWindow.Closed += (s, e) => OpenedLog = null;
+                logger.Info("Log Window Opened");
             }
             catch (Exception ex)
             {
@@ -83,6 +118,7 @@ namespace SmartZip.Views
         {
             try
             {
+                logger.Info($"Unzipping file: {zippedFilePath} with {password}");
                 if (!string.IsNullOrEmpty(password))
                 {
                     SevenZipExtractor zipExtractor = new SevenZipExtractor(zippedFilePath, password);
@@ -92,6 +128,7 @@ namespace SmartZip.Views
                     Directory.CreateDirectory(extractPath);
                     zipExtractor.ExtractArchive(extractPath);
                 }
+                logger.Info("Unzipped file successfully");
             }
             catch (Exception e)
             {
@@ -99,5 +136,12 @@ namespace SmartZip.Views
                 throw;
             }
         }
+
+        private void OnPropertyChanged(string v)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(v));
+        }
+
+        
     }
 }
