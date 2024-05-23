@@ -26,7 +26,7 @@ namespace ConsequenceAnalysis.helper
                 Stopwatch stopwatch = new Stopwatch();
                 stopwatch.Start();
                 zv = av;
-                FileName = MainFolder + "Logs\\SystemLogs " + DateTime.Now.ToString("yyyy-MM-dd HH-mm-ss");
+                FileName = MainFolder + "Logs\\SystemLogs ";
                 if (!Directory.Exists(MainFolder + "Logs"))
                 {
                     Directory.CreateDirectory(MainFolder + "Logs");

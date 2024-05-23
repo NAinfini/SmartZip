@@ -13,8 +13,7 @@ namespace SmartZip
     {
         private void Application_Startup(object sender, StartupEventArgs e)
         {
-            PasswordStorage passwordStorage = new PasswordStorage();
-            UnzipView unzipView = new UnzipView(passwordStorage);
+            UnzipView unzipView = new UnzipView(e.Args);
             unzipView.Show();
         }
     }

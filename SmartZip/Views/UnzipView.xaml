@@ -4,55 +4,74 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SmartZip.Views"
+        xmlns:controls="http://schemas.wildgums.com/orc/controls"
         mc:Ignorable="d"
-        Title="UnzipVIew" Height="400" Width="300">
+        Title="UnzipVIew" Height="290" Width="800" ResizeMode="NoResize">
+    <Window.Resources>
+        <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+            <Style TargetType="RichTextBox">
+                <Setter Property="Background" Value="{DynamicResource {x:Static SystemColors.ControlDarkDarkBrushKey}}" />
+            </Style>
+            <Style TargetType="{x:Type TextBlock}" BasedOn="{StaticResource LogViewerTextBlockStyle}" />
+            <Style TargetType="{x:Type ToggleButton}">
+                <Setter Property="Background" Value="DimGray" />
+            </Style>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Orc.LogViewer;component/Themes/Generic.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
     <Grid AllowDrop="True" Background="#FF444444">
         <Grid.RowDefinitions>
-            <RowDefinition Height="20" />
             <RowDefinition Height="30" />
-            <RowDefinition Height="10" />
-            <RowDefinition Height="100" />
-            <RowDefinition Height="20" />
-            <RowDefinition Height="15" />
-            <RowDefinition Height="20" />
-            <RowDefinition Height="20" />
-            <RowDefinition Height="120" />
+            <RowDefinition Height="160" />
+            <RowDefinition Height="30" />
             <RowDefinition Height="30" />
         </Grid.RowDefinitions>
-        <Label Content="Selected Files:" HorizontalAlignment="left" VerticalAlignment="Center" Margin="20,0,0,0"  Grid.Row="1" Foreground="White" />
-        <ListBox x:Name="listBox" ItemsSource="{Binding UnzipFileNames}" Grid.Row="3" Margin="20,0,20,0" Background="Gray" />
-        <ProgressBar x:Name="progressBar" Grid.Row="5" Margin="40,0,40,0" Background="Gray" />
-        <StackPanel Grid.Row="7" Orientation="Horizontal" HorizontalAlignment="Center">
-            <Button x:Name="btnUnzip" Content="Unzip" Grid.Row="7" Margin="10,0,0,0" />
-            <Button x:Name="btnPassword" Content="Passwords" Grid.Row="7" Margin="10,0,0,0" Click="btnPassword_Click" />
-            <Button x:Name="btnCancel" Content="Cancel" Grid.Row="7" Margin="10,0,0,0" />
+        <Label Content="Selected Files:" x:Name="fileNameLbl" HorizontalAlignment="left" VerticalAlignment="Center" Margin="20,0,0,0"  Grid.Row="0" Foreground="White" />
+        <controls:LogViewerControl
+                x:Name="LogViewerController"
+                Margin="20,0,20,10"
+                Grid.Row="1"
+                ShowDebug="True"
+                ShowInfo="True"
+                ShowWarning="True"
+                ShowError="True"
+                EnableTimestamp="False"
+                ShowMultilineMessagesExpanded="False"
+                AutoScroll="True"
+                ScrollMode="ManualScrollPriority"
+                EnableTextColoring="True"
+                EnableIcons="True"
+                InfoMessageBrush="#FF96FF96"
+                DebugMessageBrush="White"
+                ErrorMessageBrush="#FFFF9696"
+                WarningMessageBrush="#FFFFAF68" />
+        <ProgressBar x:Name="progressBar" Grid.Row="2" Margin="40,8,140,8" Background="Gray" />
+        <Label Content="0%" x:Name="progressLbl" HorizontalAlignment="Right" VerticalAlignment="Center"  Margin="0,0,20,0"  Grid.Row="2" Foreground="White" />
+        <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Stretch" Margin="0,0,0,0">
+            <Image x:Name="imgZip" Source="/Images/LogIcon.png" Width="25" Height="25" Margin="10,0,0,0" />
+            <Label Content="{Binding LastLog}"  MouseLeftButtonDown="LogTextBar_ItemClick" VerticalAlignment="Center" Width="500">
+                <Label.Style>
+                    <Style TargetType="{x:Type Label}">
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="ToolTip" Value="{Binding LastLog}" />
+                                <Setter Property="FontStyle" Value="Italic" />
+                                <Setter Property="Foreground" Value="#537bfc" />
+                                <Setter Property="Cursor" Value="Hand" />
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="false">
+                                <Setter Property="Foreground" Value="#ffffff" />
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </Label.Style>
+            </Label>
+            <Button x:Name="btnUnzip" Content="Unzip" Width="60" Margin="40,0,0,5" Click="btnUnzip_Click" />
+            <Button x:Name="btnPassword" Content="Passwords" Width="60" Margin="10,0,0,5" Click="btnPassword_Click" />
+            <Button x:Name="btnCancel" Content="Cancel" Width="60" Margin="10,0,20,5" />
         </StackPanel>
-        <StatusBar Height="30" Margin="5,5,5,5" VerticalAlignment="Center" Grid.Row="9" Background="Transparent">
-            <StatusBarItem Width="20" Height="20" VerticalAlignment="Center">
-                <StatusBarItem.Background>
-                    <ImageBrush ImageSource="/Images/LogIcon.png" />
-                </StatusBarItem.Background>
-            </StatusBarItem>
-            <Separator HorizontalAlignment="Center" Width="2" />
-            <StatusBarItem>
-                <Label Content="{Binding LastLog}"  MouseLeftButtonDown="LogTextBar_ItemClick" VerticalAlignment="Center" Width="200">
-                    <Label.Style>
-                        <Style TargetType="{x:Type Label}">
-                            <Style.Triggers>
-                                <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter Property="ToolTip" Value="{Binding LastLog}" />
-                                    <Setter Property="FontStyle" Value="Italic" />
-                                    <Setter Property="Foreground" Value="#537bfc" />
-                                    <Setter Property="Cursor" Value="Hand" />
-                                </Trigger>
-                                <Trigger Property="IsMouseOver" Value="false">
-                                    <Setter Property="Foreground" Value="#ffffff" />
-                                </Trigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Label.Style>
-                </Label>
-            </StatusBarItem>
-        </StatusBar>
     </Grid>
 </Window>

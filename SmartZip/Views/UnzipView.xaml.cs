@@ -36,8 +36,11 @@ namespace SmartZip.Views
                 OnPropertyChanged(nameof(LastLog));
             }
         }
+
+        private string[] filenames;
         private Window OpenedLog;
-        public UnzipView(PasswordStorage p)
+
+        public UnzipView(string[] args)
         {
             try
             {
@@ -45,7 +48,11 @@ namespace SmartZip.Views
                 DataContext = this;
                 Stopwatch stopwatch = new Stopwatch();
                 stopwatch.Start();
-                passwordStorage = p;
+                passwordStorage = new PasswordStorage();
+                if (args.Length > 0)
+                {
+                    filenames = args;
+                }
                 Closing += (s, e) => windowClosed();
                 SystemLogs.Initialization(this);
                 if (File.Exists("7z.dll"))
@@ -77,7 +84,6 @@ namespace SmartZip.Views
             }
             catch (Exception e)
             {
-                logger.Error(e, "Failed to save password storage");
             }
         }
 
@@ -85,19 +91,81 @@ namespace SmartZip.Views
         {
             try
             {
-                PasswordManager manager = new PasswordManager(passwordStorage);
-                manager.ShowDialog();
+                PasswordManager passwordManager = new PasswordManager(passwordStorage);
+                passwordManager.ShowDialog();
             }
             catch (Exception ex)
             {
                 logger.Error(ex, "Failed to open Password Manager");
             }
         }
+
+        private void btnUnzip_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (filenames.Length <= 0)
+                {
+                    Microsoft.Win32.OpenFileDialog openFileDialog = new Microsoft.Win32.OpenFileDialog();
+                    openFileDialog.Filter = "All Files|*.*";
+                    if (openFileDialog.ShowDialog() == true)
+                    {
+                        try
+                        {
+                            UnZip(openFileDialog.FileName);
+                        }
+                        catch
+                        {
+                            foreach (var item in passwordStorage.pass)
+                            {
+                                Thread thread = new Thread(() => UnZip(openFileDialog.FileName, item.Password));
+                                thread.Start();
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    foreach (var item in filenames)
+                    {
+                        try
+                        {
+                            UnZip(item);
+                        }
+                        catch
+                        {
+                            foreach (var pass in passwordStorage.pass)
+                            {
+                                Thread thread = new Thread(() => UnZip(item, pass.Password));
+                                thread.Start();
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex, "Failed to unzip file");
+            }
+        }
+
+        private void btnCancel_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                Close();
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex, "Failed to close UnzipView");
+            }
+        }
+
         private void LogTextBar_ItemClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             try
             {
-                if(OpenedLog != null)
+                if (OpenedLog != null)
                 {
                     OpenedLog.Focus();
                     return;
@@ -114,34 +182,80 @@ namespace SmartZip.Views
             }
         }
 
+        private void UnZip(string zippedFilePath)
+        {
+            try
+            {
+                string fileName = Path.GetFileName(zippedFilePath);
+                logger.Info($"Attempting to unzip file: {fileName} without password");
+                SevenZipExtractor zipExtractor = new SevenZipExtractor(zippedFilePath);
+                // If there are multiple files, create a new folder and extract files there.
+                string directoryName = Path.GetFileNameWithoutExtension(zippedFilePath);
+                string extractPath = Path.Combine(Path.GetDirectoryName(zippedFilePath), directoryName);
+                Directory.CreateDirectory(extractPath);
+                zipExtractor.Extracting += ZipExtractor_Extracting;
+                zipExtractor.ExtractionFinished += (s, e) =>
+                {
+                    Dispatcher.Invoke(() =>
+                    {
+                        progressBar.Value = 0;
+                        progressLbl.Content = "Extraction finished";
+                    });
+                };
+                zipExtractor.ExtractArchive(extractPath);
+                logger.Info($"File successfully unzipped");
+            }
+            catch (Exception e)
+            {
+                logger.Error($"Failed to unzip file without password");
+                throw;
+            }
+        }
+
         private void UnZip(string zippedFilePath, string password)
         {
             try
             {
-                logger.Info($"Unzipping file: {zippedFilePath} with {password}");
                 if (!string.IsNullOrEmpty(password))
                 {
+                    string fileName = Path.GetFileName(zippedFilePath);
+                    logger.Info($"Attempting to unzip file: {fileName} with password: {password}");
                     SevenZipExtractor zipExtractor = new SevenZipExtractor(zippedFilePath, password);
                     // If there are multiple files, create a new folder and extract files there.
                     string directoryName = Path.GetFileNameWithoutExtension(zippedFilePath);
                     string extractPath = Path.Combine(Path.GetDirectoryName(zippedFilePath), directoryName);
                     Directory.CreateDirectory(extractPath);
+                    zipExtractor.Extracting += ZipExtractor_Extracting;
+                    zipExtractor.ExtractionFinished += (s, e) =>
+                    {
+                        Dispatcher.Invoke(() =>
+                        {
+                            progressBar.Value = 0;
+                            progressLbl.Content = "Extraction finished";
+                        });
+                    };
                     zipExtractor.ExtractArchive(extractPath);
+                    logger.Info($"File unzipped with password {password}");
                 }
-                logger.Info("Unzipped file successfully");
             }
             catch (Exception e)
             {
-                logger.Error(e, "Failed to unzip file");
-                throw;
+                logger.Error($"Failed to unzip file with Password: {password}");
             }
+        }
+
+        private void ZipExtractor_Extracting(object? sender, ProgressEventArgs e)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                progressBar.Value = e.PercentDone;
+                progressLbl.Content = e.PercentDone + "%";
+            });
         }
 
         private void OnPropertyChanged(string v)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(v));
         }
-
-        
     }
 }
