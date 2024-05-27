@@ -12,6 +12,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using static DevExpress.Xpo.Helpers.AssociatedCollectionCriteriaHelper;
 
 namespace SmartZip.Views
 {
@@ -52,7 +53,13 @@ namespace SmartZip.Views
                 if (args.Length > 0)
                 {
                     filenames = args;
+                    logger.Info("File names added:");
+                    foreach (var item in filenames)
+                    {
+                        logger.Info(item);
+                    }
                 }
+
                 Closing += (s, e) => windowClosed();
                 SystemLogs.Initialization(this);
                 if (File.Exists("7z.dll"))
@@ -104,7 +111,7 @@ namespace SmartZip.Views
         {
             try
             {
-                if (filenames.Length <= 0)
+                if (filenames == null || filenames.Length <= 0)
                 {
                     Microsoft.Win32.OpenFileDialog openFileDialog = new Microsoft.Win32.OpenFileDialog();
                     openFileDialog.Filter = "All Files|*.*";
@@ -118,8 +125,17 @@ namespace SmartZip.Views
                         {
                             foreach (var item in passwordStorage.pass)
                             {
-                                Thread thread = new Thread(() => UnZip(openFileDialog.FileName, item.Password));
+                                bool result = false;
+                                Thread thread = new Thread(() =>
+                                {
+                                    result = UnZip(openFileDialog.FileName, item.Password);
+                                });
                                 thread.Start();
+                                Thread.Sleep(50);
+                                if (thread.IsAlive || result)
+                                {
+                                    break;
+                                }
                             }
                         }
                     }
@@ -136,8 +152,17 @@ namespace SmartZip.Views
                         {
                             foreach (var pass in passwordStorage.pass)
                             {
-                                Thread thread = new Thread(() => UnZip(item, pass.Password));
+                                bool result = false;
+                                Thread thread = new Thread(() =>
+                                {
+                                    result = UnZip(item, pass.Password);
+                                });
                                 thread.Start();
+                                Thread.Sleep(50);
+                                if (thread.IsAlive || result)
+                                {
+                                    break;
+                                }
                             }
                         }
                     }
@@ -212,7 +237,7 @@ namespace SmartZip.Views
             }
         }
 
-        private void UnZip(string zippedFilePath, string password)
+        private bool UnZip(string zippedFilePath, string password)
         {
             try
             {
@@ -236,11 +261,14 @@ namespace SmartZip.Views
                     };
                     zipExtractor.ExtractArchive(extractPath);
                     logger.Info($"File unzipped with password {password}");
+                    return true;
                 }
+                return false;
             }
             catch (Exception e)
             {
                 logger.Error($"Failed to unzip file with Password: {password}");
+                return false;
             }
         }
 
